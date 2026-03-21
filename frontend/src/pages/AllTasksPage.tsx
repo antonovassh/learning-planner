@@ -7,21 +7,40 @@ import {
   CardContent,
   Chip,
   Container,
+  FormControl,
+  InputLabel,
   LinearProgress,
   MenuItem,
   Select,
   Stack,
   Typography,
 } from '@mui/material'
+import { useMemo, useState } from 'react'
 import { Link as RouterLink } from 'react-router-dom'
 import { getGoals } from '../shared/api/goals'
 import { deleteTask, getAllTasks, updateTask } from '../shared/api/tasks'
 import type { TaskStatus } from '../shared/api/types'
 import { formatAppDateTime } from '../shared/lib/formatDate'
+import { archiveOrDeleteButtonSx } from '../shared/ui/appStyles'
 import { getTaskStatusChipSx } from '../shared/ui/statusColors'
+
+type StatusSortMode = 'done_first' | 'todo_first'
+
+const STATUS_RANK_DONE_FIRST: Record<TaskStatus, number> = {
+  Done: 0,
+  InProgress: 1,
+  Todo: 2,
+}
+
+const STATUS_RANK_TODO_FIRST: Record<TaskStatus, number> = {
+  Todo: 0,
+  InProgress: 1,
+  Done: 2,
+}
 
 export default function AllTasksPage() {
   const queryClient = useQueryClient()
+  const [statusSort, setStatusSort] = useState<StatusSortMode>('done_first')
 
   const goalsQuery = useQuery({
     queryKey: ['goals'],
@@ -59,14 +78,45 @@ export default function AllTasksPage() {
   const tasks = tasksQuery.data ?? []
   const isLoading = tasksQuery.isLoading || goalsQuery.isLoading
 
+  const sortedTasks = useMemo(() => {
+    const rank = statusSort === 'done_first' ? STATUS_RANK_DONE_FIRST : STATUS_RANK_TODO_FIRST
+    const titles = new Map((goalsQuery.data ?? []).map((g) => [g.id, g.title]))
+    return [...tasks].sort((a, b) => {
+      const byStatus = rank[a.status] - rank[b.status]
+      if (byStatus !== 0) return byStatus
+      const titleA = titles.get(a.goalId) ?? ''
+      const titleB = titles.get(b.goalId) ?? ''
+      const byGoal = titleA.localeCompare(titleB, undefined, { sensitivity: 'base' })
+      if (byGoal !== 0) return byGoal
+      if (a.order !== b.order) return a.order - b.order
+      return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+    })
+  }, [tasks, statusSort, goalsQuery.data])
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Typography variant="h5" fontWeight={600} gutterBottom>
         All tasks
       </Typography>
-      <Typography color="text.secondary" sx={{ mb: 3 }}>
+      <Typography color="text.secondary" sx={{ mb: 2 }}>
         All tasks across your goals.
       </Typography>
+
+      {tasks.length > 0 ? (
+        <FormControl size="small" sx={{ minWidth: 280, maxWidth: '100%', mb: 2 }}>
+          <InputLabel id="all-tasks-sort-label">Sort by status</InputLabel>
+          <Select
+            labelId="all-tasks-sort-label"
+            id="all-tasks-sort"
+            label="Sort by status"
+            value={statusSort}
+            onChange={(e) => setStatusSort(e.target.value as StatusSortMode)}
+          >
+            <MenuItem value="done_first">Done → In progress → Todo</MenuItem>
+            <MenuItem value="todo_first">Todo → In progress → Done</MenuItem>
+          </Select>
+        </FormControl>
+      ) : null}
 
       {isLoading ? <LinearProgress sx={{ mb: 2 }} /> : null}
       {tasksQuery.isError ? (
@@ -80,7 +130,7 @@ export default function AllTasksPage() {
       ) : null}
 
       <Stack spacing={2}>
-        {tasks.map((task) => {
+        {sortedTasks.map((task) => {
           const goalTitle = goalTitleById.get(task.goalId) ?? 'Unknown goal'
           return (
             <Card
@@ -136,7 +186,7 @@ export default function AllTasksPage() {
                       <MenuItem value="InProgress">In progress</MenuItem>
                       <MenuItem value="Done">Done</MenuItem>
                     </Select>
-                    <Button color="error" onClick={() => deleteMutation.mutate(task.id)}>
+                    <Button variant="text" sx={archiveOrDeleteButtonSx} onClick={() => deleteMutation.mutate(task.id)}>
                       Delete
                     </Button>
                   </Stack>

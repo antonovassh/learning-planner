@@ -12,17 +12,22 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  InputLabel,
   LinearProgress,
+  MenuItem,
+  Select,
   Stack,
   TextField,
   Typography,
 } from '@mui/material'
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link as RouterLink } from 'react-router-dom'
 import { z } from 'zod'
 import { createGoal, getGoals, updateGoal } from '../shared/api/goals'
-import type { GoalInput } from '../shared/api/types'
+import type { GoalInput, GoalStatus } from '../shared/api/types'
+import { archiveOrDeleteButtonSx } from '../shared/ui/appStyles'
 import { getGoalStatusChipSx } from '../shared/ui/statusColors'
 
 const goalSchema = z.object({
@@ -34,8 +39,23 @@ type GoalFormValues = z.infer<typeof goalSchema>
 
 const goalsQueryKey = ['goals']
 
+type GoalSortMode = 'active_first' | 'archived_first'
+
+const GOAL_STATUS_RANK_ACTIVE_FIRST: Record<GoalStatus, number> = {
+  Active: 0,
+  Completed: 1,
+  Archived: 2,
+}
+
+const GOAL_STATUS_RANK_ARCHIVED_FIRST: Record<GoalStatus, number> = {
+  Archived: 0,
+  Completed: 1,
+  Active: 2,
+}
+
 export default function GoalsPage() {
   const [isOpen, setOpen] = useState(false)
+  const [statusSort, setStatusSort] = useState<GoalSortMode>('active_first')
   const queryClient = useQueryClient()
 
   const { data, isLoading, isError } = useQuery({
@@ -69,6 +89,19 @@ export default function GoalsPage() {
     createMutation.mutate(values)
   })
 
+  const goals = data ?? []
+  const sortedGoals = useMemo(() => {
+    const rank =
+      statusSort === 'active_first' ? GOAL_STATUS_RANK_ACTIVE_FIRST : GOAL_STATUS_RANK_ARCHIVED_FIRST
+    return [...goals].sort((a, b) => {
+      const byStatus = rank[a.status] - rank[b.status]
+      if (byStatus !== 0) return byStatus
+      const byTitle = a.title.localeCompare(b.title, undefined, { sensitivity: 'base' })
+      if (byTitle !== 0) return byTitle
+      return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+    })
+  }, [goals, statusSort])
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
@@ -80,11 +113,27 @@ export default function GoalsPage() {
         </Button>
       </Stack>
 
+      {goals.length > 0 ? (
+        <FormControl size="small" sx={{ minWidth: 280, maxWidth: '100%', mb: 2, mt: 1 }}>
+          <InputLabel id="goals-sort-label">Sort by status</InputLabel>
+          <Select
+            labelId="goals-sort-label"
+            id="goals-sort"
+            label="Sort by status"
+            value={statusSort}
+            onChange={(e) => setStatusSort(e.target.value as GoalSortMode)}
+          >
+            <MenuItem value="active_first">Active → Completed → Archived</MenuItem>
+            <MenuItem value="archived_first">Archived → Completed → Active</MenuItem>
+          </Select>
+        </FormControl>
+      ) : null}
+
       {isLoading ? <LinearProgress /> : null}
       {isError ? <Alert severity="error">Failed to load goals.</Alert> : null}
 
       <Stack spacing={2} mt={2}>
-        {(data ?? []).map((goal) => (
+        {sortedGoals.map((goal) => (
           <Card
             key={goal.id}
             variant="outlined"
@@ -107,11 +156,7 @@ export default function GoalsPage() {
                     Open
                   </Button>
                   {goal.status !== 'Archived' ? (
-                    <Button
-                      color="warning"
-                      variant="text"
-                      onClick={() => archiveMutation.mutate(goal.id)}
-                    >
+                    <Button variant="text" sx={archiveOrDeleteButtonSx} onClick={() => archiveMutation.mutate(goal.id)}>
                       Archive
                     </Button>
                   ) : null}

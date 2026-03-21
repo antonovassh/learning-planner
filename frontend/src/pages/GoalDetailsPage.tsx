@@ -32,6 +32,7 @@ import { getGoalById } from '../shared/api/goals'
 import { createTask, deleteTask, getTasks, updateTask } from '../shared/api/tasks'
 import type { TaskInput, TaskStatus } from '../shared/api/types'
 import { formatAppDateTime } from '../shared/lib/formatDate'
+import { archiveOrDeleteButtonSx } from '../shared/ui/appStyles'
 import { getGoalStatusChipSx, getTaskStatusChipSx } from '../shared/ui/statusColors'
 
 const taskSchema = z.object({
@@ -268,7 +269,7 @@ export default function GoalDetailsPage() {
                         <MenuItem value="InProgress">In progress</MenuItem>
                         <MenuItem value="Done">Done</MenuItem>
                       </Select>
-                      <Button color="error" onClick={() => deleteMutation.mutate(task.id)}>
+                      <Button variant="text" sx={archiveOrDeleteButtonSx} onClick={() => deleteMutation.mutate(task.id)}>
                         Delete
                       </Button>
                     </Stack>
