@@ -95,6 +95,16 @@ export const localStoreApi = {
       .sort((a, b) => a.order - b.order)
   },
 
+  getAllTasks(): LearningTask[] {
+    const tasks = readJson(tasksKey, seedTasks)
+    return [...tasks].sort((a, b) => {
+      if (a.goalId !== b.goalId) {
+        return a.goalId.localeCompare(b.goalId)
+      }
+      return a.order - b.order
+    })
+  },
+
   createTask(goalId: string, input: TaskInput): LearningTask {
     const tasks = readJson(tasksKey, seedTasks)
     const order = Math.max(...tasks.filter((x) => x.goalId === goalId).map((x) => x.order), 0) + 1

@@ -6,6 +6,8 @@ export interface Goal {
   title: string
   description?: string
   status: GoalStatus
+  /** 0–100 from API (completed tasks ratio) */
+  progress?: number
   createdAt: string
   updatedAt: string
 }
@@ -30,4 +32,6 @@ export interface TaskInput {
   title: string
   description?: string
   status?: TaskStatus
+  /** Backend requires order on create; default 0 in API layer */
+  order?: number
 }

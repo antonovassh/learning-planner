@@ -23,6 +23,20 @@ builder.Services.AddScoped<ILearningGoalRepository, LearningGoalRepository>();
 builder.Services.AddScoped<ILearningTaskRepository, LearningTaskRepository>();
 builder.Services.AddScoped<IGoalProgressService, GoalProgressService>();
 
+const string corsPolicyName = "Frontend";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(corsPolicyName, policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -30,7 +44,15 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();        
     app.UseSwaggerUI();     
 }
-app.UseHttpsRedirection();
+
+// In Development, skip HTTPS redirect so http://localhost:5189 stays HTTP.
+// Otherwise the browser follows 307 → https://7072 and CORS/preflight often breaks for the SPA on :5173.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
+
+app.UseCors(corsPolicyName);
 
 app.UseAuthorization();
 
