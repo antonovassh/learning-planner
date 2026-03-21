@@ -23,6 +23,20 @@ builder.Services.AddScoped<ILearningGoalRepository, LearningGoalRepository>();
 builder.Services.AddScoped<ILearningTaskRepository, LearningTaskRepository>();
 builder.Services.AddScoped<IGoalProgressService, GoalProgressService>();
 
+const string corsPolicyName = "Frontend";
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(corsPolicyName, policy =>
+    {
+        policy
+            .WithOrigins(
+                "http://localhost:5173",
+                "http://127.0.0.1:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -31,6 +45,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();     
 }
 app.UseHttpsRedirection();
+
+app.UseCors(corsPolicyName);
 
 app.UseAuthorization();
 
