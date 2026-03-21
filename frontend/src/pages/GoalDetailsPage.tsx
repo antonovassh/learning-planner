@@ -30,8 +30,9 @@ import { Link as RouterLink, useParams } from 'react-router-dom'
 import { z } from 'zod'
 import { getGoalById } from '../shared/api/goals'
 import { createTask, deleteTask, getTasks, updateTask } from '../shared/api/tasks'
-import type { GoalStatus, TaskInput, TaskStatus } from '../shared/api/types'
+import type { TaskInput, TaskStatus } from '../shared/api/types'
 import { formatAppDateTime } from '../shared/lib/formatDate'
+import { getGoalStatusChipSx, getTaskStatusChipSx } from '../shared/ui/statusColors'
 
 const taskSchema = z.object({
   title: z.string().trim().min(3, 'Minimum 3 characters'),
@@ -40,18 +41,6 @@ const taskSchema = z.object({
 })
 
 type TaskFormValues = z.infer<typeof taskSchema>
-
-const taskStatusColorMap: Record<TaskStatus, 'default' | 'warning' | 'success'> = {
-  Todo: 'default',
-  InProgress: 'warning',
-  Done: 'success',
-}
-
-function goalStatusColor(status: GoalStatus): 'default' | 'success' | 'warning' {
-  if (status === 'Completed') return 'success'
-  if (status === 'Archived') return 'warning'
-  return 'default'
-}
 
 export default function GoalDetailsPage() {
   const { goalId } = useParams()
@@ -154,7 +143,7 @@ export default function GoalDetailsPage() {
                 <Typography variant="h5" fontWeight={700} component="h1">
                   {goal.title}
                 </Typography>
-                <Chip label={goal.status} color={goalStatusColor(goal.status)} size="small" />
+                <Chip label={goal.status} size="small" sx={getGoalStatusChipSx(goal.status)} />
               </Stack>
 
               <Typography variant="body1" color="text.secondary">
@@ -258,7 +247,7 @@ export default function GoalDetailsPage() {
                         {task.description?.trim() ? task.description : 'No description'}
                       </Typography>
                       <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap">
-                        <Chip label={task.status} color={taskStatusColorMap[task.status]} size="small" />
+                        <Chip label={task.status} size="small" sx={getTaskStatusChipSx(task.status)} />
                         <Typography variant="caption" color="text.secondary">
                           Order {task.order} · Created {formatAppDateTime(task.createdAt)}
                         </Typography>

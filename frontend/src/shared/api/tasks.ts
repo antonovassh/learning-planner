@@ -6,6 +6,19 @@ import type { LearningTask, TaskInput, TaskStatus } from './types'
 
 const tasksPath = 'LearningTasks'
 
+/** GET api/LearningTasks — all tasks across goals */
+export async function getAllTasks(): Promise<LearningTask[]> {
+  try {
+    const { data } = await apiClient.get<LearningTaskResponseDto[]>(tasksPath)
+    return data.map(mapTaskDto)
+  } catch (error) {
+    if (shouldUseLocalFallback(error)) {
+      return localStoreApi.getAllTasks()
+    }
+    throw error
+  }
+}
+
 export async function getTasks(goalId: string): Promise<LearningTask[]> {
   try {
     const { data } = await apiClient.get<LearningTaskResponseDto[]>(`${tasksPath}/goal/${goalId}`)

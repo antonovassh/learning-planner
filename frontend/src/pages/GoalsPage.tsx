@@ -23,6 +23,7 @@ import { Link as RouterLink } from 'react-router-dom'
 import { z } from 'zod'
 import { createGoal, getGoals, updateGoal } from '../shared/api/goals'
 import type { GoalInput } from '../shared/api/types'
+import { getGoalStatusChipSx } from '../shared/ui/statusColors'
 
 const goalSchema = z.object({
   title: z.string().trim().min(3, 'Minimum 3 characters'),
@@ -32,12 +33,6 @@ const goalSchema = z.object({
 type GoalFormValues = z.infer<typeof goalSchema>
 
 const goalsQueryKey = ['goals']
-
-function statusColor(status: string): 'default' | 'success' | 'warning' {
-  if (status === 'Completed') return 'success'
-  if (status === 'Archived') return 'warning'
-  return 'default'
-}
 
 export default function GoalsPage() {
   const [isOpen, setOpen] = useState(false)
@@ -105,7 +100,7 @@ export default function GoalsPage() {
                   <Typography variant="body2" color="text.secondary" mb={1}>
                     {goal.description || 'No description'}
                   </Typography>
-                  <Chip size="small" label={goal.status} color={statusColor(goal.status)} />
+                  <Chip size="small" label={goal.status} sx={getGoalStatusChipSx(goal.status)} />
                 </Box>
                 <Stack direction="row" spacing={1}>
                   <Button component={RouterLink} to={`/goals/${goal.id}`} variant="outlined">
