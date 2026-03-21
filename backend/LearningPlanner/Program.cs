@@ -44,7 +44,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();        
     app.UseSwaggerUI();     
 }
-app.UseHttpsRedirection();
+
+// In Development, skip HTTPS redirect so http://localhost:5189 stays HTTP.
+// Otherwise the browser follows 307 → https://7072 and CORS/preflight often breaks for the SPA on :5173.
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseCors(corsPolicyName);
 

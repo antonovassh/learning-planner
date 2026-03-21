@@ -6,7 +6,7 @@ export interface Goal {
   title: string
   description?: string
   status: GoalStatus
-  /** 0–1 from API when loaded from backend */
+  /** 0–100 from API (completed tasks ratio) */
   progress?: number
   createdAt: string
   updatedAt: string
