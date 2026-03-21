@@ -53,17 +53,6 @@ function goalStatusColor(status: GoalStatus): 'default' | 'success' | 'warning' 
   return 'default'
 }
 
-function formatDate(iso: string): string {
-  try {
-    return new Date(iso).toLocaleString(undefined, {
-      dateStyle: 'medium',
-      timeStyle: 'short',
-    })
-  } catch {
-    return iso
-  }
-}
-
 export default function GoalDetailsPage() {
   const { goalId } = useParams()
   const queryClient = useQueryClient()

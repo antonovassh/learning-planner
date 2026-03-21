@@ -1,35 +1,20 @@
-import { AppBar, Box, Toolbar, Typography } from '@mui/material'
-import { Link as RouterLink, Outlet } from 'react-router-dom'
+import { Box } from '@mui/material'
+import { Outlet } from 'react-router-dom'
+import AppNavDrawer from './AppNavDrawer'
 
 export default function AppLayout() {
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <AppBar
-        position="sticky"
-        color="inherit"
-        elevation={0}
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <AppNavDrawer />
+      <Box
+        component="main"
         sx={{
-          borderBottom: 1,
-          borderColor: 'divider',
-          bgcolor: 'background.paper',
+          flexGrow: 1,
+          minWidth: 0,
+          overflow: 'auto',
+          bgcolor: 'background.default',
         }}
       >
-        <Toolbar>
-          <Typography
-            variant="h6"
-            component={RouterLink}
-            to="/goals"
-            sx={{
-              textDecoration: 'none',
-              color: 'inherit',
-              fontWeight: 700,
-            }}
-          >
-            Learning Planner
-          </Typography>
-        </Toolbar>
-      </AppBar>
-      <Box component="main" sx={{ flex: 1 }}>
         <Outlet />
       </Box>
     </Box>
