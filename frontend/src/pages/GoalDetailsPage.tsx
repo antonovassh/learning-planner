@@ -127,7 +127,14 @@ export default function GoalDetailsPage() {
 
       <Stack spacing={2} mt={2}>
         {(tasksQuery.data ?? []).map((task) => (
-          <Card key={task.id} variant="outlined">
+          <Card
+            key={task.id}
+            variant="outlined"
+            sx={{
+              borderRadius: 4,
+              boxShadow: '0 8px 20px rgba(79, 70, 229, 0.08)',
+            }}
+          >
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={2}>
                 <Box>

@@ -77,14 +77,9 @@ export default function GoalsPage() {
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
       <Stack direction="row" justifyContent="space-between" alignItems="center" mb={2}>
-        <Box>
-          <Typography variant="h4" fontWeight={700}>
-            Learning Goals
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Frontend MVP with Material UI and React Query
-          </Typography>
-        </Box>
+        <Typography variant="h5" fontWeight={600} color="text.primary">
+          Goals
+        </Typography>
         <Button variant="contained" onClick={() => setOpen(true)}>
           Add goal
         </Button>
@@ -95,7 +90,14 @@ export default function GoalsPage() {
 
       <Stack spacing={2} mt={2}>
         {(data ?? []).map((goal) => (
-          <Card key={goal.id} variant="outlined">
+          <Card
+            key={goal.id}
+            variant="outlined"
+            sx={{
+              borderRadius: 4,
+              boxShadow: '0 8px 20px rgba(79, 70, 229, 0.08)',
+            }}
+          >
             <CardContent>
               <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={2}>
                 <Box>
