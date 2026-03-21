@@ -14,7 +14,6 @@ import {
   DialogTitle,
   FormControl,
   InputLabel,
-  LinearProgress,
   MenuItem,
   Select,
   Stack,
@@ -25,6 +24,7 @@ import { useMemo, useState } from 'react'
 import { Controller, useForm } from 'react-hook-form'
 import { Link as RouterLink } from 'react-router-dom'
 import { z } from 'zod'
+import GoalsOverviewWidgets from '../components/goals/GoalsOverviewWidgets'
 import { createGoal, getGoals, updateGoal } from '../shared/api/goals'
 import type { GoalInput, GoalStatus } from '../shared/api/types'
 import { archiveOrDeleteButtonSx } from '../shared/ui/appStyles'
@@ -113,6 +113,8 @@ export default function GoalsPage() {
         </Button>
       </Stack>
 
+      <GoalsOverviewWidgets goals={goals} isLoading={isLoading} />
+
       {goals.length > 0 ? (
         <FormControl size="small" sx={{ minWidth: 280, maxWidth: '100%', mb: 2, mt: 1 }}>
           <InputLabel id="goals-sort-label">Sort by status</InputLabel>
@@ -129,7 +131,6 @@ export default function GoalsPage() {
         </FormControl>
       ) : null}
 
-      {isLoading ? <LinearProgress /> : null}
       {isError ? <Alert severity="error">Failed to load goals.</Alert> : null}
 
       <Stack spacing={2} mt={2}>
