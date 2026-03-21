@@ -1,6 +1,7 @@
 import axios from 'axios'
 
-const fallbackBaseUrl = 'http://localhost:5000/api'
+/** Matches backend/LearningPlanner/Properties/launchSettings.json (profile "http") */
+const fallbackBaseUrl = 'http://localhost:5189/api'
 
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? fallbackBaseUrl,
@@ -16,5 +17,6 @@ export function shouldUseLocalFallback(error: unknown): boolean {
     return true
   }
 
-  return error.response.status >= 500 || error.response.status === 404
+  // Wrong routes should surface as errors; only server/network issues use local demo data.
+  return error.response.status >= 500
 }
