@@ -1,14 +1,12 @@
-
-
-
-
-using LearningPlanner.Api.Middleware;
 using LearningPlanner.Application.Abstractions;
 using LearningPlanner.Application.Services;
 using LearningPlanner.Infrastructure;
 using LearningPlanner.Infrastructure.Repository;
 using LearningPlanner.Infrastructure.Security;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -50,6 +48,30 @@ builder.Services.AddScoped<ITokenProvider>(sp =>
 });
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+// Configure JWT authentication
+var jwtSecret = builder.Configuration["Jwt:Secret"] 
+    ?? throw new InvalidOperationException("Jwt:Secret is not configured");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "LearningPlanner";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "LearningPlannerAPI";
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSecret)),
+            ValidateIssuer = true,
+            ValidIssuer = jwtIssuer,
+            ValidateAudience = true,
+            ValidAudience = jwtAudience,
+            ValidateLifetime = true,
+            ClockSkew = TimeSpan.Zero
+        };
+    });
+
+builder.Services.AddAuthorization();
+
 const string corsPolicyName = "Frontend";
 builder.Services.AddCors(options =>
 {
@@ -81,9 +103,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseCors(corsPolicyName);
 
-// Add JWT middleware
-app.UseMiddleware<JwtMiddleware>();
-
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

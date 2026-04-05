@@ -24,9 +24,10 @@ namespace LearningPlanner.Api.Controllers
 
         private Guid GetUserId()
         {
-            if (!HttpContext.Items.TryGetValue("UserId", out var userId))
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim) || !Guid.TryParse(userIdClaim, out var userId))
                 throw new UnauthorizedAccessException("User not authenticated");
-            return (Guid)userId;
+            return userId;
         }
 
         // GET: api/LearningTasks
