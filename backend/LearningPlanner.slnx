@@ -1,6 +1,6 @@
 <Solution>
   <Project Path="LearningPlanner.Application/LearningPlanner.Application.csproj" Id="69902514-cd1e-479f-8683-54f18e644334" />
-  <Project Path="LearningPlanner.Core/LearningPlanner.Domain.csproj" />
-  <Project Path="LearningPlanner.DataAccess/LearningPlanner.Infrastructure.csproj" Id="a647a5e6-ddfb-4362-b7a3-c1292ff9f12c" />
+  <Project Path="LearningPlanner.Domain/LearningPlanner.Domain.csproj" />
+  <Project Path="LearningPlanner.Infrastructure/LearningPlanner.Infrastructure.csproj" Id="a647a5e6-ddfb-4362-b7a3-c1292ff9f12c" />
   <Project Path="LearningPlanner/LearningPlanner.API.csproj" />
 </Solution>
