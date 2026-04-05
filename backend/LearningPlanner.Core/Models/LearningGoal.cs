@@ -1,8 +1,9 @@
-﻿namespace LearningPlanner.Core.Models
+﻿namespace LearningPlanner.Domain.Models
 {
     public class LearningGoal
     {
         public Guid Id { get; private set; }
+        public Guid UserId { get; private set; }
         public string Title { get; private set; }
         public string? Description { get; private set; }
         public GoalStatus Status { get; private set; }
@@ -12,9 +13,10 @@
         private readonly List<LearningTask> _tasks = new();
         public IReadOnlyCollection<LearningTask> Tasks => _tasks;
 
-        public LearningGoal(string title, string? description = null)
+        public LearningGoal(Guid userId, string title, string? description = null)
         {
             Id = Guid.NewGuid();
+            UserId = userId;
             Title = title;
             Description = description;
             Status = GoalStatus.Active;
@@ -22,9 +24,10 @@
             UpdatedAt = DateTime.UtcNow;
         }
 
-        public LearningGoal(Guid id, string title, string? description, GoalStatus status, DateTime createdAt, DateTime updatedAt)
+        public LearningGoal(Guid id, Guid userId, string title, string? description, GoalStatus status, DateTime createdAt, DateTime updatedAt)
         {
             Id = id;
+            UserId = userId;
             Title = title;
             Description = description;
             Status = status;

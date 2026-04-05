@@ -1,14 +1,16 @@
 using LearningPlanner.Api.DTOs;
 using LearningPlanner.Api.Mappers;
 using LearningPlanner.Application.Abstractions;
-using LearningPlanner.Core.Models;
+using LearningPlanner.Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using TaskStatus = LearningPlanner.Core.Models.TaskStatus;
+using TaskStatus = LearningPlanner.Domain.Models.TaskStatus;
 
 namespace LearningPlanner.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class LearningTasksController : ControllerBase
     {
         private readonly ILearningTaskRepository _taskRepository;
@@ -20,12 +22,21 @@ namespace LearningPlanner.Api.Controllers
             _goalRepository = goalRepository;
         }
 
+        private Guid GetUserId()
+        {
+            if (!HttpContext.Items.TryGetValue("UserId", out var userId))
+                throw new UnauthorizedAccessException("User not authenticated");
+            return (Guid)userId;
+        }
+
         // GET: api/LearningTasks
         [HttpGet]
         public async Task<ActionResult<List<LearningTaskResponse>>> GetAll(CancellationToken ct)
         {
+            var userId = GetUserId();
             var tasks = await _taskRepository.GetAllAsync(ct);
-            var response = tasks.Select(t => t.ToResponse()).ToList();
+            var userTasks = tasks.Where(t => t.UserId == userId).ToList();
+            var response = userTasks.Select(t => t.ToResponse()).ToList();
             return Ok(response);
         }
 
@@ -58,10 +69,11 @@ namespace LearningPlanner.Api.Controllers
         {
             if (request == null) return BadRequest();
 
+            var userId = GetUserId();
             var goal = await _goalRepository.GetByIdAsync(goalId, ct);
-            if (goal == null) return NotFound("Goal not found");
+            if (goal == null || goal.UserId != userId) return NotFound("Goal not found");
 
-            var task = new LearningTask(goalId, request.Title, request.Description, request.Order);
+            var task = new LearningTask(userId, goalId, request.Title, request.Description, request.Order);
             await _taskRepository.AddAsync(task, ct);
             await _taskRepository.SaveChangesAsync(ct);
 

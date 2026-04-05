@@ -1,4 +1,4 @@
-namespace LearningPlanner.Core.Models
+namespace LearningPlanner.Domain.Models
 {
     public enum GoalStatus
     {

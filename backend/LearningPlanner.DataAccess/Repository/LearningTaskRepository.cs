@@ -1,11 +1,11 @@
 using LearningPlanner.Application.Abstractions;
-using LearningPlanner.Core.Models;
-using LearningPlanner.DataAccess.Entities;
-using LearningPlanner.DataAccess.Mappers;
+using LearningPlanner.Domain.Models;
+using LearningPlanner.Infrastructure;
+using LearningPlanner.Infrastructure.Mappers;
 using Microsoft.EntityFrameworkCore;
-using CoreTaskStatus = LearningPlanner.Core.Models.TaskStatus;
+using CoreTaskStatus = LearningPlanner.Domain.Models.TaskStatus;
 
-namespace LearningPlanner.DataAccess.Repository
+namespace LearningPlanner.Infrastructure.Repository
 {
     public class LearningTaskRepository : ILearningTaskRepository
     {

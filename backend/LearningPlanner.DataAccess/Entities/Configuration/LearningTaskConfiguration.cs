@@ -1,7 +1,8 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using LearningPlanner.Infrastructure.Entities;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace LearningPlanner.DataAccess.Entities.Configuration
+namespace LearningPlanner.Infrastructure.Entities.Configuration
 {
     public class LearningTaskConfiguration : IEntityTypeConfiguration<LearningTaskEntity>
     {

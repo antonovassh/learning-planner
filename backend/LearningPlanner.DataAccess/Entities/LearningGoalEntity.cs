@@ -1,4 +1,4 @@
-﻿namespace LearningPlanner.DataAccess.Entities
+﻿namespace LearningPlanner.Infrastructure.Entities
 {
     public class LearningGoalEntity
     {

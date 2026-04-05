@@ -1,14 +1,27 @@
 
+
+
+
+using LearningPlanner.Api.Middleware;
 using LearningPlanner.Application.Abstractions;
 using LearningPlanner.Application.Services;
-using LearningPlanner.DataAccess;
-using LearningPlanner.DataAccess.Repository;
+using LearningPlanner.Infrastructure;
+using LearningPlanner.Infrastructure.Repository;
+using LearningPlanner.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Configure to load appsettings.Development.json in development environment
+builder.Configuration
+    .SetBasePath(builder.Environment.ContentRootPath)
+    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+    .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
+    .AddEnvironmentVariables();
+
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddControllers();
@@ -22,6 +35,20 @@ builder.Services.AddOpenApi();
 builder.Services.AddScoped<ILearningGoalRepository, LearningGoalRepository>();
 builder.Services.AddScoped<ILearningTaskRepository, LearningTaskRepository>();
 builder.Services.AddScoped<IGoalProgressService, GoalProgressService>();
+
+// Add Auth services
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<ITokenProvider>(sp =>
+{
+    var config = sp.GetRequiredService<IConfiguration>();
+    var secret = config["Jwt:Secret"] ?? throw new InvalidOperationException("Jwt:Secret is not configured");
+    var issuer = config["Jwt:Issuer"] ?? "LearningPlanner";
+    var audience = config["Jwt:Audience"] ?? "LearningPlannerAPI";
+    var expiryMinutes = config.GetValue<int>("Jwt:ExpiryMinutes", 15);
+    return new TokenProvider(secret, issuer, audience, expiryMinutes);
+});
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 const string corsPolicyName = "Frontend";
 builder.Services.AddCors(options =>
@@ -41,8 +68,8 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();        
-    app.UseSwaggerUI();     
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 // In Development, skip HTTPS redirect so http://localhost:5189 stays HTTP.
@@ -54,10 +81,11 @@ if (!app.Environment.IsDevelopment())
 
 app.UseCors(corsPolicyName);
 
+// Add JWT middleware
+app.UseMiddleware<JwtMiddleware>();
+
 app.UseAuthorization();
 
 app.MapControllers();
 
 app.Run();
-
-

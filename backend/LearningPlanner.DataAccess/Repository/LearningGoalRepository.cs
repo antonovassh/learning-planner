@@ -1,10 +1,9 @@
 ﻿using LearningPlanner.Application.Abstractions;
-using LearningPlanner.Core.Models;
-using LearningPlanner.DataAccess.Entities;
-using LearningPlanner.DataAccess.Mappers;
+using LearningPlanner.Domain.Models;
+using LearningPlanner.Infrastructure.Mappers;
 using Microsoft.EntityFrameworkCore;
 
-namespace LearningPlanner.DataAccess.Repository
+namespace LearningPlanner.Infrastructure.Repository
 {
     public class LearningGoalRepository : ILearningGoalRepository
     {

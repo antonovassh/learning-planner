@@ -1,8 +1,7 @@
-using LearningPlanner.Core.Models;
-using LearningPlanner.DataAccess.Entities;
-using TaskStatus = LearningPlanner.Core.Models.TaskStatus;
+using LearningPlanner.Domain.Models;
+using LearningPlanner.Infrastructure.Entities;
 
-namespace LearningPlanner.DataAccess.Mappers
+namespace LearningPlanner.Infrastructure.Mappers
 {
     public static class GoalMapper
     {
@@ -14,6 +13,7 @@ namespace LearningPlanner.DataAccess.Mappers
 
             return new LearningGoal(
                 entity.Id,
+                Guid.Empty,
                 entity.Title,
                 entity.Description,
                 status,

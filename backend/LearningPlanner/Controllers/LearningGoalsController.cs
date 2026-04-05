@@ -1,13 +1,15 @@
 ﻿using LearningPlanner.Api.DTOs;
 using LearningPlanner.Api.Mappers;
 using LearningPlanner.Application.Abstractions;
-using LearningPlanner.Core.Models;
+using LearningPlanner.Domain.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LearningPlanner.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class LearningGoalsController : ControllerBase
     {
         private readonly ILearningGoalRepository _repository;
@@ -19,14 +21,23 @@ namespace LearningPlanner.Api.Controllers
             _progressService = progressService;
         }
 
+        private Guid GetUserId()
+        {
+            if (!HttpContext.Items.TryGetValue("UserId", out var userId))
+                throw new UnauthorizedAccessException("User not authenticated");
+            return (Guid)userId;
+        }
+
         // GET: api/LearningGoalEntities
         [HttpGet]
         public async Task<ActionResult<List<LearningGoalResponse>>> GetAll(CancellationToken ct)
         {
+            var userId = GetUserId();
             var goals = await _repository.GetAllAsync(ct);
+            var userGoals = goals.Where(g => g.UserId == userId).ToList();
             var response = new List<LearningGoalResponse>();
 
-            foreach (var goal in goals)
+            foreach (var goal in userGoals)
             {
                 var progress = await _progressService.GetGoalProgressAsync(goal.Id, ct);
                 response.Add(goal.ToResponse(progress));
@@ -53,7 +64,8 @@ namespace LearningPlanner.Api.Controllers
         {
             if (request == null) return BadRequest();
 
-            var goal = new LearningGoal(request.Title, request.Description);
+            var userId = GetUserId();
+            var goal = new LearningGoal(userId, request.Title, request.Description);
             await _repository.AddAsync(goal, ct);
             await _repository.SaveChangesAsync(ct);
 

@@ -1,4 +1,4 @@
-﻿using LearningPlanner.Core.Models;
+﻿using LearningPlanner.Domain.Models;
 
 namespace LearningPlanner.Application.Abstractions
 {

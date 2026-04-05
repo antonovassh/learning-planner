@@ -291,6 +291,12 @@ node_modules/
 # Visual Studio 6 workspace options file
 *.opt
 
+# Application settings files with sensitive data
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.local.json
+
+
 # Visual Studio 6 auto-generated workspace file (contains which files were open etc.)
 *.vbw
 

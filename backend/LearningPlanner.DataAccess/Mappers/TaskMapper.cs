@@ -1,8 +1,8 @@
-using LearningPlanner.Core.Models;
-using LearningPlanner.DataAccess.Entities;
-using TaskStatus = LearningPlanner.Core.Models.TaskStatus;
+using LearningPlanner.Domain.Models;
+using LearningPlanner.Infrastructure.Entities;
+using TaskStatus = LearningPlanner.Domain.Models.TaskStatus;
 
-namespace LearningPlanner.DataAccess.Mappers
+namespace LearningPlanner.Infrastructure.Mappers
 {
     public static class TaskMapper
     {
@@ -14,6 +14,7 @@ namespace LearningPlanner.DataAccess.Mappers
 
             return new LearningTask(
                 entity.Id,
+                Guid.Empty,
                 entity.GoalId,
                 entity.Title,
                 entity.Description,

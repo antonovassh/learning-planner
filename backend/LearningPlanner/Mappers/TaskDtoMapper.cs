@@ -1,6 +1,5 @@
 using LearningPlanner.Api.DTOs;
-using LearningPlanner.Core.Models;
-using TaskStatus = LearningPlanner.Core.Models.TaskStatus;
+using LearningPlanner.Domain.Models;
 
 namespace LearningPlanner.Api.Mappers
 {
