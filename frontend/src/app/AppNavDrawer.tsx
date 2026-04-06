@@ -1,8 +1,10 @@
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined'
 import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined'
+import LogoutOutlinedIcon from '@mui/icons-material/LogoutOutlined'
 import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined'
 import {
   Box,
+  Button,
   Divider,
   Drawer,
   List,
@@ -13,6 +15,7 @@ import {
   Typography,
 } from '@mui/material'
 import { NavLink } from 'react-router-dom'
+import { useAuth } from '../shared/auth/AuthContext'
 
 export const DRAWER_WIDTH = 260
 
@@ -31,6 +34,8 @@ const navLinkSx = {
 }
 
 export default function AppNavDrawer() {
+  const { logout } = useAuth()
+
   return (
     <Drawer
       variant="permanent"
@@ -73,6 +78,18 @@ export default function AppNavDrawer() {
             <ListItemText primary="All tasks" primaryTypographyProps={{ fontWeight: 500 }} />
           </ListItemButton>
         </List>
+      </Box>
+      <Box sx={{ px: 2, py: 2, mt: 'auto' }}>
+        <Button
+          variant="outlined"
+          fullWidth
+          startIcon={<LogoutOutlinedIcon />}
+          onClick={() => {
+            void logout()
+          }}
+        >
+          Logout
+        </Button>
       </Box>
     </Drawer>
   )

@@ -6,6 +6,7 @@ const fallbackBaseUrl = 'http://localhost:5189/api'
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? fallbackBaseUrl,
   timeout: 4000,
+  withCredentials: true,
 })
 
 let warnedAboutLocalFallback = false
