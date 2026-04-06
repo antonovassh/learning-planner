@@ -29,7 +29,7 @@ namespace LearningPlanner.Api.Controllers
             return userId;
         }
 
-        // GET: api/LearningGoalEntities
+        // GET: api/LearningGoals
         [HttpGet]
         public async Task<ActionResult<List<LearningGoalResponse>>> GetAll(CancellationToken ct)
         {
@@ -47,7 +47,7 @@ namespace LearningPlanner.Api.Controllers
             return Ok(response);
         }
 
-        // GET: api/LearningGoalEntities/{id}
+        // GET: api/LearningGoals/{id}
         [HttpGet("{id}")]
         public async Task<ActionResult<LearningGoalResponse>> GetById(Guid id, CancellationToken ct)
         {
@@ -59,7 +59,7 @@ namespace LearningPlanner.Api.Controllers
             return Ok(response);
         }
 
-        // POST: api/LearningGoalEntities
+        // POST: api/LearningGoals
         [HttpPost]
         public async Task<ActionResult<LearningGoalResponse>> Create([FromBody] CreateLearningGoalRequest request, CancellationToken ct)
         {
@@ -74,7 +74,7 @@ namespace LearningPlanner.Api.Controllers
             return CreatedAtAction(nameof(GetById), new { id = response.Id }, response);
         }
 
-        // PUT: api/LearningGoalEntities/{id}
+        // PUT: api/LearningGoals/{id}
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(Guid id, [FromBody] UpdateLearningGoalRequest request, CancellationToken ct)
         {
@@ -103,7 +103,7 @@ namespace LearningPlanner.Api.Controllers
             return NoContent();
         }
 
-        // DELETE: api/LearningGoalEntities/{id}
+        // DELETE: api/LearningGoals/{id}
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(Guid id, CancellationToken ct)
         {
@@ -115,7 +115,7 @@ namespace LearningPlanner.Api.Controllers
             return NoContent();
         }
 
-        // PATCH: api/LearningGoalEntities/{id}/soft-delete
+        // PATCH: api/LearningGoals/{id}/soft-delete
         [HttpPatch("{id}/soft-delete")]
         public async Task<IActionResult> SoftDelete(Guid id, CancellationToken ct)
         {

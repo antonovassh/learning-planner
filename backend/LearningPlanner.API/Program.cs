@@ -1,3 +1,4 @@
+using LearningPlanner.API.Configuration;
 using LearningPlanner.Application.Abstractions;
 using LearningPlanner.Application.Services;
 using LearningPlanner.Infrastructure;
@@ -6,6 +7,8 @@ using LearningPlanner.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using Scalar.AspNetCore;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,15 +23,15 @@ builder.Configuration
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi(options =>
+{
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+});
 
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<AppDbContext>(
     options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
 
 builder.Services.AddScoped<ILearningGoalRepository, LearningGoalRepository>();
 builder.Services.AddScoped<ILearningTaskRepository, LearningTaskRepository>();
@@ -90,8 +93,8 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    app.MapOpenApi();
+    app.MapScalarApiReference();
 }
 
 // In Development, skip HTTPS redirect so http://localhost:5189 stays HTTP.
