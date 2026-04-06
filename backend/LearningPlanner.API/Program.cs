@@ -5,6 +5,7 @@ using LearningPlanner.Infrastructure;
 using LearningPlanner.Infrastructure.Repository;
 using LearningPlanner.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.CookiePolicy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -13,14 +14,12 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configure to load appsettings.Development.json in development environment
 builder.Configuration
     .SetBasePath(builder.Environment.ContentRootPath)
     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
     .AddJsonFile($"appsettings.{builder.Environment.EnvironmentName}.json", optional: true, reloadOnChange: true)
     .AddEnvironmentVariables();
 
-// Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddOpenApi(options =>
@@ -37,7 +36,6 @@ builder.Services.AddScoped<ILearningGoalRepository, LearningGoalRepository>();
 builder.Services.AddScoped<ILearningTaskRepository, LearningTaskRepository>();
 builder.Services.AddScoped<IGoalProgressService, GoalProgressService>();
 
-// Add Auth services
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ITokenProvider>(sp =>
@@ -51,8 +49,7 @@ builder.Services.AddScoped<ITokenProvider>(sp =>
 });
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Configure JWT authentication
-var jwtSecret = builder.Configuration["Jwt:Secret"] 
+var jwtSecret = builder.Configuration["Jwt:Secret"]
     ?? throw new InvalidOperationException("Jwt:Secret is not configured");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "LearningPlanner";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "LearningPlannerAPI";
@@ -75,6 +72,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 builder.Services.AddAuthorization();
 
+builder.Services.Configure<CookiePolicyOptions>(options =>
+{
+    options.MinimumSameSitePolicy = SameSiteMode.Strict;
+    options.HttpOnly = HttpOnlyPolicy.Always;
+    options.Secure = CookieSecurePolicy.Always;
+});
+
 const string corsPolicyName = "Frontend";
 builder.Services.AddCors(options =>
 {
@@ -83,9 +87,12 @@ builder.Services.AddCors(options =>
         policy
             .WithOrigins(
                 "http://localhost:5173",
-                "http://127.0.0.1:5173")
+                "http://127.0.0.1:5173",
+                "http://localhost:3000",
+                "http://localhost:3001")
             .AllowAnyHeader()
-            .AllowAnyMethod();
+            .AllowAnyMethod()
+            .AllowCredentials();
     });
 });
 
@@ -97,13 +104,12 @@ if (app.Environment.IsDevelopment())
     app.MapScalarApiReference();
 }
 
-// In Development, skip HTTPS redirect so http://localhost:5189 stays HTTP.
-// Otherwise the browser follows 307 → https://7072 and CORS/preflight often breaks for the SPA on :5173.
 if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
 
+app.UseCookiePolicy();
 app.UseCors(corsPolicyName);
 
 app.UseAuthentication();

@@ -50,7 +50,8 @@ namespace LearningPlanner.Application.Services
             {
                 Success = true,
                 Message = "User registered successfully",
-                UserId = user.Id
+                UserId = user.Id,
+                Email = user.Email
             };
         }
 
@@ -75,6 +76,8 @@ namespace LearningPlanner.Application.Services
                 };
             }
 
+            await RevokeAllUserRefreshTokensAsync(user.Id, cancellationToken);
+
             var accessToken = _tokenProvider.GenerateJwtToken(user.Id, user.Email);
             var refreshToken = _tokenProvider.GenerateRefreshToken();
 
@@ -87,7 +90,8 @@ namespace LearningPlanner.Application.Services
                 Success = true,
                 AccessToken = accessToken,
                 RefreshToken = refreshToken,
-                UserId = user.Id
+                UserId = user.Id,
+                Email = user.Email
             };
         }
 
@@ -136,8 +140,48 @@ namespace LearningPlanner.Application.Services
                 Success = true,
                 AccessToken = newAccessToken,
                 RefreshToken = newRefreshToken,
-                UserId = user.Id
+                UserId = user.Id,
+                Email = user.Email
             };
+        }
+
+        public async Task<AuthResult> LogoutAsync(Guid userId, string refreshToken, CancellationToken cancellationToken)
+        {
+            var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+            if (user == null)
+            {
+                return new AuthResult
+                {
+                    Success = false,
+                    Message = "User not found"
+                };
+            }
+
+            var tokenEntity = user.RefreshTokens.FirstOrDefault(rt => rt.Token == refreshToken);
+            if (tokenEntity != null)
+            {
+                tokenEntity.Revoke();
+                await _userRepository.SaveChangesAsync(cancellationToken);
+            }
+
+            return new AuthResult
+            {
+                Success = true,
+                Message = "Logged out successfully"
+            };
+        }
+
+        private async Task RevokeAllUserRefreshTokensAsync(Guid userId, CancellationToken cancellationToken)
+        {
+            var user = await _userRepository.GetByIdAsync(userId, cancellationToken);
+            if (user != null)
+            {
+                foreach (var token in user.RefreshTokens.Where(t => !t.IsRevoked))
+                {
+                    token.Revoke();
+                }
+                await _userRepository.SaveChangesAsync(cancellationToken);
+            }
         }
     }
 }
